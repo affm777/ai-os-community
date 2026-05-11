@@ -1,16 +1,26 @@
 # Fathom-Sync als Claude-Code-Routine einrichten
 
-Migration der automatisierten Fathom-Meeting-Sync von Cloud-Scheduled-Tasks (claude.ai) auf Routines in der Claude-Code-Desktop-App.
+Migration des Fathom-Meeting-Sync-Workflows von **Scheduled Tasks in Claude Cowork** auf **Routines im Claude Code** (Reiter in der Claude-Desktop-App).
 
 ## Warum migrieren?
 
-**Cloud-Scheduled-Tasks laufen in der Cloud** und haben **keinen Zugriff auf deine lokalen Claude-Code-Skills** (z.B. `brain:sync-meetings`). Routinen in der Claude-Code-Desktop-App laufen lokal auf deinem Rechner und greifen damit auf deine komplette Skill-Bibliothek zu.
+**Claude Cowork und Claude Code haben getrennte Skill-Bibliotheken.**
+
+Alles, was du als Skill in `~/.claude/skills/` bzw. `~/.claude/commands/` angelegt hast (z.B. `brain:sync-meetings`), ist erreichbar ueber:
+
+- Claude Code im **Terminal**
+- Claude Code in **Cursor**
+- Claude Code als **Reiter in der Claude-Desktop-App**
+
+In **Claude Cowork** (wo Scheduled Tasks bisher liefen) ist diese Skill-Bibliothek **nicht verfuegbar**. Was bisher passiert ist: der Scheduled Task hat einen Prompt-Text wie „bitte fuehre brain:sync-meetings aus" bekommen, Claude in Cowork hat den Text **interpretiert** und oft das Richtige getan — aber nicht den tatsaechlichen Skill aufgerufen. Das ist zufaellig und fragil.
+
+**Die Loesung:** Routines im Claude Code nutzen. Dort wird der Skill **deterministisch** aufgerufen, weil die Skill-Bibliothek im selben Kontext liegt.
 
 **Was du brauchst:**
 
-- macOS oder Windows mit Claude-Code-Desktop-App installiert
-- Fathom-Connector in claude.ai aktiviert und im Claude Code als MCP-Server verbunden
-- Vault unter `~/Documents/Second-Brain/` (Standard aus `ai-os-starter`)
+- macOS oder Windows mit Claude-Desktop-App installiert (Reiter „Claude Code")
+- Fathom-Connector aktiviert und in Claude Code als MCP-Server verbunden
+- Vault unter `~/Documents/Second-Brain/` (Standard aus dem Bootstrap)
 - Skill `brain:sync-meetings` in `~/.claude/commands/brain/sync-meetings.md` (kommt aus dem Bootstrap)
 
 ## Schritt 1: Settings.json um Permissions ergaenzen
@@ -89,23 +99,23 @@ Wenn keine Ausgabe `JSON OK`: JSON kaputt, Syntax pruefen (vergessenes Komma o.a
 **Wichtig:** Settings.json wird nur beim Prozess-Start gelesen, nicht pro Chat.
 
 1. Alle offenen Claude-Code-Chats schliessen
-2. **Claude-Code-Desktop-App komplett beenden** (macOS: `Cmd+Q`, nicht nur Fenster schliessen)
+2. **Claude-Desktop-App komplett beenden** (macOS: `Cmd+Q`, nicht nur Fenster schliessen)
 3. App neu oeffnen
 
 Nach dem Neustart sind die neuen Permissions aktiv.
 
-## Schritt 4: Alte Cloud-Scheduled-Task loeschen
+## Schritt 4: Alte Scheduled Task in Claude Cowork loeschen
 
-1. claude.ai im Browser oeffnen
-2. Zu Scheduled Tasks navigieren
+1. claude.ai im Browser oeffnen, in den Bereich **Claude Cowork** wechseln
+2. Zu **Scheduled Tasks** navigieren
 3. Den Task fuer Fathom-Sync identifizieren (typisch: cron-Schedule mit Aufruf von `brain:sync-meetings` oder aehnlichem Prompt)
 4. **Loeschen**
 
 Damit verhindert, dass spaeter zwei parallele Syncs laufen und Duplikate erzeugen.
 
-## Schritt 5: Routine in der Desktop App anlegen
+## Schritt 5: Routine im Claude Code anlegen
 
-1. In der Claude-Code-Desktop-App: rechts oben auf den Settings/Profil-Bereich, dann zu **Routines** wechseln
+1. In der Claude-Desktop-App in den Reiter **Claude Code** wechseln, dann zu **Routines**
 2. **New Routine** klicken
 3. Konfiguration:
    - **Name:** `fathom-sync-daily` (oder eigener Name)
@@ -137,7 +147,27 @@ Damit verhindert, dass spaeter zwei parallele Syncs laufen und Duplikate erzeuge
 - `Bash(cat:*)` falls der Skill `cat` statt `Read` nutzt
 - Andere MCP-Server-IDs falls Fathom-Connector unter anderem Namen registriert ist
 
-## Schritt 7: Verifikation nach 1-2 Tagen
+## Schritt 7: Wenn trotz Auto-Mode noch Permission-Prompts kommen
+
+Bei einigen TN tauchen auch nach Schritt 1-6 vereinzelt noch Permission-Prompts auf, obwohl der Auto-Mode aktiv ist. Grund: das UI-Toggle „Auto-Mode" ist pro Chat-Session, die `allow`-Liste in `settings.json` greift erst, wenn alle Tools dort exakt gelistet sind.
+
+**Fallback:** Statt selbst in der `settings.json` zu suchen, gibst du Claude Code den folgenden Prompt — Claude vergleicht die Permissions mit dem, was der Skill braucht, und ergaenzt fehlende Eintraege automatisch:
+
+```
+Du bist mein Setup-Assistent. Bitte fuehre folgenden Plan aus:
+
+1. Lies ~/.claude/settings.json
+2. Lies ~/.claude/commands/brain/sync-meetings.md
+3. Identifiziere alle Tools (Read, Write, Edit, Glob, Grep, Bash-Commands, MCP-Tools), die der Skill verwendet
+4. Vergleiche mit dem permissions.allow-Array in settings.json
+5. Ergaenze fehlende Eintraege so, dass der Skill ohne Prompts durchlaufen kann
+6. Validiere die JSON-Struktur mit `jq . ~/.claude/settings.json > /dev/null`
+7. Sag mir, was du ergaenzt hast und ob ein App-Neustart noetig ist
+```
+
+Diesen Block kopierst du 1:1 in einen frischen Claude-Code-Chat. Nach Abschluss: Claude Code komplett neu starten (Cmd+Q, dann oeffnen), dann Test-Run erneut ausfuehren.
+
+## Schritt 8: Verifikation nach 1-2 Tagen
 
 Nach 1-2 Routine-Laeufen pruefen:
 

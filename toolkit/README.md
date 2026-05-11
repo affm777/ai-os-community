@@ -8,17 +8,4 @@ Jeder Unterordner enthaelt ein in sich geschlossenes Mini-Projekt: eine Bug-Fix-
 
 | Ordner | Zweck |
 |---|---|
-| `fathom-routine/` | Fathom-Meeting-Sync von Cloud-Scheduled-Tasks auf lokale Desktop-Routines umstellen |
-
-## Nutzung
-
-1. Repo aktualisieren: `git pull` im lokalen Klon von `ai-os-starter`
-2. Den passenden Unterordner oeffnen
-3. README darin Schritt fuer Schritt durchgehen
-
-## Beitraege
-
-Neue Toolkit-Eintraege landen hier, wenn sie:
-- ein konkretes Problem loesen, das mehrere Workshop-TN haben
-- ohne den Rest des Setups funktionieren (in sich geschlossen)
-- mit einer Schritt-fuer-Schritt-Anleitung dokumentiert sind
+| `fathom-routine/` | Fathom-Meeting-Sync von Scheduled Tasks in Claude Cowork auf Routines im Claude Code umstellen |
