@@ -6,9 +6,9 @@ Du hattest deinen Fathom-Sync bisher als **Scheduled Task in Claude Cowork** lau
 
 Claude Cowork und Claude Code haben **getrennte Skill-Bibliotheken**.
 
-Alles, was wir bisher als Skill angelegt haben, ist über Claude Code erreichbar: im Terminal, in Cursor und im Reiter **Code** der Claude-Desktop-App. Alle drei zeigen auf dasselbe Verzeichnis. In **Claude Cowork** ist diese Skill-Bibliothek **nicht verfügbar**.
+Alles, was wir bisher als Skill angelegt haben, ist über Claude Code erreichbar: im Terminal, in Cursor und im Reiter **Code** der Claude-Desktop-App. Alle drei zeigen auf dasselbe Verzeichnis. In **Claude Cowork** ist die Skill-Bibliothek **nicht verfügbar**, da hier eine gesonderte Skill-Bibliothek gepflegt wird.
 
-Was bisher passiert ist: der Scheduled Task hat den Prompt-Text „bitte führe brain:sync-meetings aus" bekommen, Claude in Cowork hat den Text **interpretiert** und oft das Richtige getan, aber nicht den tatsächlichen Skill aufgerufen. Funktioniert zufällig, nicht zuverlässig.
+Was bisher passiert ist: der Scheduled Task hat die Beschreibung und den `brain:sync-meetings`-Aufruf selbst **interpretiert** und oft das Richtige getan, aber nicht den tatsächlichen Skill aufgerufen. Funktioniert zufällig, nicht zuverlässig.
 
 **Lösung:** Routine im Claude Code. Dort wird der Skill **deterministisch** aufgerufen, weil die Skill-Bibliothek im selben Kontext liegt.
 
