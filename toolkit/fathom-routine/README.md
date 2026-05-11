@@ -116,9 +116,5 @@ Nach Abschluss: Claude-Desktop-App **komplett beenden** (macOS: `Cmd+Q`, nicht n
 - Fathom-Connector aktiv? In der Claude-Desktop-App unten links auf deinen Namen klicken, dann **Einstellungen → Konnektoren** prüfen
 - Im Routine-Chat-Verlauf nach Fehlermeldungen suchen. Wenn unklar: einen neuen Claude-Code-Chat öffnen (egal aus welchem Projekt), das Problem schildern, den Chatverlauf mitschicken und nach einem Lösungsansatz fragen
 
-**Neue Meetings landen nicht in `01_Inbox/`, sondern in `02_Projects/`**
-- Datei manuell zurück nach `~/Documents/Second-Brain/01_Inbox/` verschieben
-- Einsortieren in den richtigen Projekt-Ordner macht später `/brain:sort-inbox`, nicht die Sync-Routine
-
 **Trotz Schritt 5 immer noch Permission-Prompts**
 - Hast du die App **komplett beendet** (Cmd+Q) und neu gestartet? Settings werden nur beim App-Start geladen.
