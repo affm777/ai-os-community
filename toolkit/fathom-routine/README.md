@@ -10,7 +10,7 @@ Alles, was wir bisher als Skill angelegt haben, ist über Claude Code erreichbar
 
 Was bisher passiert ist: der Scheduled Task hat die Beschreibung und den `brain:sync-meetings`-Aufruf selbst **interpretiert** und oft das Richtige getan, aber nicht den tatsächlichen Skill aufgerufen. Funktioniert zufällig, nicht zuverlässig.
 
-**Lösung:** Routine im Claude Code. Dort wird der Skill **deterministisch** aufgerufen, weil die Skill-Bibliothek im selben Kontext liegt.
+**Lösung:** Routine im Claude Code. Dort wird der Skill **deterministisch** aufgerufen, weil die Skill-Bibliothek im selben Verzeichnis liegt.
 
 ## Schritt 1: Alte Scheduled Task in Claude Cowork löschen
 
