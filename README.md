@@ -2,9 +2,9 @@
 
 Best Practices, Toolkits und Add-ons rund um ein produktives **AI Operating System** mit Claude Code, Obsidian, MCPs und Routines.
 
-- **Schritt-fuer-Schritt-Anleitungen** zu konkreten Setups und Migrationen
+- **Schritt-für-Schritt-Anleitungen** zu konkreten Setups und Migrationen
 - **Bug-Fixes** und Workarounds aus der Praxis
-- **Best-Practice-Patterns** fuer Vault, Skills, MCPs und Automatisierung
+- **Best-Practice-Patterns** für Vault, Skills, MCPs und Automatisierung
 
 ## Struktur
 
@@ -16,4 +16,4 @@ Weitere Bereiche (best-practices/, examples/) wachsen mit der Zeit.
 
 ## Lizenz
 
-MIT — siehe [LICENSE](LICENSE).
+MIT, siehe [LICENSE](LICENSE).

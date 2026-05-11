@@ -1,10 +1,10 @@
 # Toolkit
 
-Sammlung von Schritt-fuer-Schritt-Anleitungen und Add-ons fuer dein AI Operating System.
+Sammlung von Schritt-für-Schritt-Anleitungen und Add-ons für dein AI Operating System.
 
-Jeder Unterordner enthaelt ein in sich geschlossenes Mini-Projekt: eine Bug-Fix-Anleitung, ein Upgrade-Pfad, ein zusaetzlicher Workflow. Du kannst gezielt einzelne Anleitungen ziehen, ohne den Rest deines Setups zu beruehren.
+Jeder Unterordner enthält ein in sich geschlossenes Mini-Projekt: eine Bug-Fix-Anleitung, ein Upgrade-Pfad, ein zusätzlicher Workflow. Du kannst gezielt einzelne Anleitungen ziehen, ohne den Rest deines Setups zu berühren.
 
-## Verfuegbare Toolkits
+## Verfügbare Toolkits
 
 | Ordner | Zweck |
 |---|---|
