@@ -6,7 +6,7 @@ Du hattest deinen Fathom-Sync bisher als **Scheduled Task in Claude Cowork** lau
 
 Claude Cowork und Claude Code haben **getrennte Skill-Bibliotheken**.
 
-Alles, was du als Skill in `~/.claude/` angelegt hast (z.B. `brain:sync-meetings`), ist erreichbar über Claude Code, also im Terminal, in Cursor, und im Reiter „Code" der Claude-Desktop-App. In **Claude Cowork** ist diese Skill-Bibliothek **nicht verfügbar**.
+Alles, was wir bisher als Skill angelegt haben, ist über Claude Code erreichbar: im Terminal, in Cursor und im Reiter **Code** der Claude-Desktop-App. Alle drei zeigen auf dasselbe Verzeichnis. In **Claude Cowork** ist diese Skill-Bibliothek **nicht verfügbar**.
 
 Was bisher passiert ist: der Scheduled Task hat den Prompt-Text „bitte führe brain:sync-meetings aus" bekommen, Claude in Cowork hat den Text **interpretiert** und oft das Richtige getan, aber nicht den tatsächlichen Skill aufgerufen. Funktioniert zufällig, nicht zuverlässig.
 
@@ -14,7 +14,7 @@ Was bisher passiert ist: der Scheduled Task hat den Prompt-Text „bitte führe 
 
 ## Schritt 1: Alte Scheduled Task in Claude Cowork löschen
 
-1. claude.ai im Browser öffnen, in den Bereich **Cowork** wechseln
+1. Claude-Desktop-App öffnen, oben links im Fenster auf den Reiter **Cowork** klicken
 2. Zu **Scheduled Tasks** navigieren
 3. Den Fathom-Sync-Task finden
 4. **Löschen**
@@ -23,10 +23,9 @@ Damit verhindert, dass später zwei Syncs parallel laufen und Duplikate erzeugen
 
 ## Schritt 2: Routine im Claude Code anlegen
 
-1. Claude-Desktop-App öffnen
-2. Oben auf den Reiter **Code** wechseln (neben „Chat" und „Cowork")
-3. Links in der Seitenleiste auf **Routines**
-4. Oben rechts auf **Neue Routine** → **Lokal**
+1. Oben auf den Reiter **Code** wechseln (neben „Chat" und „Cowork")
+2. Links in der Seitenleiste auf **Routines**
+3. Oben rechts auf **Neue Routine** → **Lokal**
 
 ![Routinen-Übersicht mit Neue-Routine-Dropdown](screenshot-1-routines.png)
 
@@ -61,7 +60,7 @@ Wenn alles glatt durchgelaufen ist: **Migration erfolgreich**. Du bist fertig.
 
 ## Schritt 5 (Optional): Permission-Fallback
 
-Manchmal fragt Claude trotz aktiviertem Auto-Modus nach Berechtigungen für einzelne Tools. Falls dir das im Testlauf passiert: kopiere den folgenden Block 1:1 in einen frischen Claude-Code-Chat. Claude ergänzt die fehlenden Permissions selbst in deiner `~/.claude/settings.json`, ohne dass du selbst editieren musst.
+Manchmal fragt Claude trotz aktiviertem Auto-Modus nach Berechtigungen für einzelne Tools. Falls dir das im Testlauf passiert: kopiere den folgenden Block 1:1 in einen frischen Claude-Code-Chat (egal aus welchem Projekt heraus). Claude ergänzt die fehlenden Permissions selbst in deiner `~/.claude/settings.json`, ohne dass du selbst editieren musst.
 
 ````markdown
 Ich brauche deine Hilfe, meine Claude-Code-Settings sauber zu erweitern.
@@ -114,8 +113,8 @@ Nach Abschluss: Claude-Desktop-App **komplett beenden** (macOS: `Cmd+Q`, nicht n
 ## Wenn etwas nicht klappt
 
 **Keine neuen Meetings im Inbox**
-- Fathom-Connector aktiv? In claude.ai unter `/connectors` prüfen
-- Im Routine-Chat-Verlauf nach Fehlermeldungen suchen
+- Fathom-Connector aktiv? In der Claude-Desktop-App unten links auf deinen Namen klicken, dann **Einstellungen → Konnektoren** prüfen
+- Im Routine-Chat-Verlauf nach Fehlermeldungen suchen. Wenn unklar: einen neuen Claude-Code-Chat öffnen (egal aus welchem Projekt), das Problem schildern, den Chatverlauf mitschicken und nach einem Lösungsansatz fragen
 
 **Neue Meetings landen nicht in `01_Inbox/`, sondern in `02_Projects/`**
 - Datei manuell zurück nach `~/Documents/Second-Brain/01_Inbox/` verschieben
