@@ -67,6 +67,85 @@ const { chromium } = require('playwright');
 
 **Pflicht-Flags:** `printBackground: true` (sonst druckt Chromium keine Backgrounds) und `preferCSSPageSize: true` (sonst ignoriert es dein `@page { size: ... }`).
 
+### HTML-Skelett für Print (Pflicht bei Pfad B)
+
+Häufigster Bug bei Pfad B: **Inhalt erscheint im PDF viel zu klein**. Ursache fast immer: HTML-Container ist in Slide-Pixeln ausgelegt (z.B. `width: 1920px` aus einem 16:9-Template), `@page { size: A4 }` skaliert den Container dann passend → Schrift wirkt winzig.
+
+**Lösung: Print-HTML in `mm` und `pt` auslegen, nicht in Pixeln.** Pixel sind für Slides (Pfad A), für Print (Pfad B) sind `mm`/`pt` deterministisch über alle DPIs.
+
+**Skelett für A4-Reports, Whitepaper, Newsletter:**
+
+```html
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    @page { size: A4; margin: 0; }
+
+    html, body { margin: 0; padding: 0; }
+    body {
+      width: 210mm;
+      font-family: "Inter", system-ui, sans-serif;
+      font-size: 11pt;
+      line-height: 1.5;
+      color: #111;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 20mm 22mm;
+      box-sizing: border-box;
+      page-break-after: always;
+      position: relative;
+      overflow: hidden;
+    }
+    .page:last-child { page-break-after: auto; }
+
+    h1 { font-size: 22pt; margin: 0 0 8mm; font-weight: 700; }
+    h2 { font-size: 14pt; margin: 8mm 0 4mm; font-weight: 600; }
+    h3 { font-size: 12pt; margin: 6mm 0 3mm; font-weight: 600; }
+    p  { font-size: 11pt; margin: 0 0 4mm; }
+    ul, ol { font-size: 11pt; margin: 0 0 4mm; padding-left: 6mm; }
+  </style>
+</head>
+<body>
+  <section class="page">
+    <h1>Titel</h1>
+    <p>Inhalt …</p>
+  </section>
+</body>
+</html>
+```
+
+### Diagnose bei "Inhalt zu klein" oder "falsche Skalierung"
+
+Diese 5 Ursachen abklopfen, in dieser Reihenfolge:
+
+1. **Container in Slide-Pixeln statt Print-mm** — Body und `.page` müssen `width: 210mm` (oder Ziel-Format) haben, nicht `1920px`, `1200px` o.ä.
+2. **`@page` fehlt oder ohne `margin: 0`** — Default-Chromium-Margins fressen ~15 mm pro Seite
+3. **Body- oder HTML-Margins nicht genullt** — `html, body { margin: 0; padding: 0 }` ist Pflicht
+4. **Font-Sizes in `px` aus Slide-Template** — auf `pt` umstellen: body 11pt, h2 14pt, h1 22pt (Print-Konvention)
+5. **`transform: scale(...)` aus früherer Iteration nicht entfernt** — bricht Layout-Box, Browser paginiert weiter im falschen Format
+
+### Print-Format-Maße (für andere Formate als A4)
+
+Wenn nicht A4: Body und `.page` Width auf das Format anpassen, `@page { size: ... }` mitziehen.
+
+| Format | Maße (Body width × .page min-height) | `@page` |
+|---|---|---|
+| A4 (Standard) | `210mm × 297mm` | `size: A4` |
+| A5 (Flyer) | `148mm × 210mm` | `size: A5` |
+| A3 (Poster) | `297mm × 420mm` | `size: A3` |
+| Letter (US) | `216mm × 279mm` | `size: Letter` |
+| Postkarte A6 | `148mm × 105mm` (landscape) | `size: A6 landscape` |
+| Visitenkarte EU | `85mm × 55mm` | `size: 85mm 55mm` |
+
 ## Workflow-Doktrin
 
 1. **HTML im Browser iterieren** über einen lokalen HTTP-Server (`python3 -m http.server 8765`), nie direkt über `file://` — das blockiert Font- und Image-Loads. Visuelle Verifikation via Playwright open + screenshot.
