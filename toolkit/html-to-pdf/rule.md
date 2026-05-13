@@ -2,13 +2,26 @@
 
 Globale Konvention für reproduzierbare PDF- und PNG-Outputs aus HTML. Gilt für **alle Formate**: Slide-Decks (16:9, 4:3, 9:16), Print-Dokumente (A4, A5, Letter, A3, Flyer, Visitenkarten, Postkarten), Long-Form (Newsletter, Whitepaper, Angebote, Rechnungen) und Social-Visuals (LinkedIn-Post, Instagram-Story, X-Card, Reel).
 
-## Pipeline (Pflicht)
+## Pipeline-Entscheidung (zwei Pfade)
 
-PDFs und PNGs aus HTML werden über den **designer-Skill** gerendert (`~/.claude/skills/designer/`). Der Skill nutzt **Screenshot-Assembly** (Playwright → PNG → pdf-lib), nicht Chromium `page.pdf()`.
+Es gibt **zwei legitime Render-Pfade**. Welcher passt, hängt vom Inhalt ab. Beide Pfade nutzen das Pflicht-CSS weiter unten — das ist die Grundlage in beiden Fällen.
 
-**Grund:** `page.pdf()` produziert Artefakte bei border-radius + Hintergrund, ignoriert Hintergrundfarben by default, repaginiert unerwartet bei `position: fixed`. Screenshot-Assembly rasterisiert pro Frame pixelgenau und assembliert deterministisch.
+### Entscheidungsbaum
 
-**Standard-Command (Beispiel 16:9 Slides, 144 dpi):**
+| Render-Inhalt | Pfad | Warum |
+|---|---|---|
+| Slide-Deck mit Gradients, Ornamenten, komplexen Backgrounds, border-radius mit Hintergrund | **Pfad A: Screenshot-Assembly** | Rastert pixelgenau, vermeidet Chromium-Rendering-Bugs |
+| Text-lastiger A4-Report, Whitepaper, Newsletter, Angebot, Rechnung, Long-Form | **Pfad B: `page.pdf()` (Vektor)** | Text bleibt vektoriell und damit gestochen scharf, kleinere Dateigröße, suchbar |
+| Print-Flyer, Visitenkarte, Postkarte mit Hochaufflösungs-Anspruch | **Pfad A mit Template × 3** | Echtes 300 dpi für Druckerei |
+| Social-Visual (LinkedIn-Post, Instagram, X-Card) als PNG | **Pfad A `--scale 2`** | PNG-Output, kein PDF nötig |
+
+**Faustregel:** Inhalt überwiegend Text und einfaches Layout → Pfad B. Inhalt visuell komplex (Slides, Print-Visuals) → Pfad A.
+
+### Pfad A: Screenshot-Assembly (visuell-komplex)
+
+Playwright Screenshot pro Frame → PNG → pdf-lib. Über den **designer-Skill** (`~/.claude/skills/designer/`).
+
+**Standard-Command:**
 
 ```bash
 node ~/.claude/skills/designer/scripts/assemble-pdf.mjs \
@@ -17,7 +30,42 @@ node ~/.claude/skills/designer/scripts/assemble-pdf.mjs \
   --format 16-9
 ```
 
-Vorgelagert: Playwright Screenshot pro `.designer-slide`, `.designer-page`, `.designer-canvas` (oder `.slide` / `.page` in eigenen Templates). Unterstützte `--format`-Werte: `a4`, `letter`, `a3`, `a5`, `16-9`, `4-3`, `9-16`, `dl`, `visitenkarte`, `postkarte`. Vollständiger Format-Katalog in `~/.claude/skills/designer/references/format-catalog.md`.
+**Scale-Wahl entscheidet über Schärfe:**
+
+- `--scale 2` (144 dpi) → Screen, WhatsApp, Web-Preview
+- `--scale 3` (216 dpi) → Print-tauglich (Default für gedruckte Slides)
+- Template-Pixel × 3 + `--scale 1` → echtes 300 dpi für Druckerei
+
+Selektoren: `.designer-slide`, `.designer-page`, `.designer-canvas` oder `.slide` / `.page`. Unterstützte `--format`-Werte: `a4`, `letter`, `a3`, `a5`, `16-9`, `4-3`, `9-16`, `dl`, `visitenkarte`, `postkarte`. Format-Katalog: `~/.claude/skills/designer/references/format-catalog.md`.
+
+### Pfad B: `page.pdf()` (text-lastig, Vektor)
+
+Direkter Chromium-PDF-Export. Output bleibt vektoriell — Text ist bei jeder Vergrößerung scharf, Datei klein, Inhalt suchbar und kopierbar.
+
+**Voraussetzung:** Das Pflicht-CSS weiter unten ist im HTML aktiv. Ohne das CSS treten die 5 Killer-Gotchas auf (graue Ränder, fehlende Hintergrundfarben, etc.).
+
+**Standard-Command via Playwright-Script:**
+
+```bash
+node -e "
+const { chromium } = require('playwright');
+(async () => {
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+  await page.goto('http://localhost:8765/report.html', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1500);
+  await page.pdf({
+    path: 'out/report.pdf',
+    printBackground: true,        // PFLICHT — Hintergründe drucken
+    preferCSSPageSize: true,      // @page-Regeln respektieren
+    margin: { top: 0, bottom: 0, left: 0, right: 0 }
+  });
+  await browser.close();
+})();
+"
+```
+
+**Pflicht-Flags:** `printBackground: true` (sonst druckt Chromium keine Backgrounds) und `preferCSSPageSize: true` (sonst ignoriert es dein `@page { size: ... }`).
 
 ## Workflow-Doktrin
 
@@ -69,7 +117,8 @@ In `<style>` oder externem CSS einbauen, bevor Layout-Spezifika kommen. Verhinde
 | `background-attachment: fixed` | `background-attachment: scroll` oder weglassen | Chromium clippt fixed-Backgrounds im PDF |
 | `<img src="logo.svg">` | Inline-SVG direkt im HTML einbetten | File-Loading-Race, SVG fehlt manchmal im PDF |
 | JPEG-Logo auf Farbfläche | PNG mit Transparenz oder base64-data-URL | JPEG-Kompression erzeugt sichtbare Rahmen |
-| `page.pdf()` direkt | Screenshot-Assembly via `assemble-pdf.mjs` | Chromium `page.pdf()` hat Border-Radius-Bug und druckt Hintergrundfarben standardmäßig nicht |
+| `page.pdf()` **ohne** Pflicht-CSS und ohne `printBackground: true` | mit Pflicht-CSS plus `printBackground: true, preferCSSPageSize: true` | Sonst graue Ränder bei border-radius und fehlende Hintergrundfarben |
+| `page.pdf()` für visuell komplexe Slides mit Gradients/Ornamenten | Screenshot-Assembly (Pfad A) | Vektor-Export kann Gradients fehlerhaft renderieren, Screenshot rastert deterministisch |
 | nur `tr { page-break-inside: avoid }` | zusätzlich `tbody { page-break-inside: auto }` | sonst wird ganze Tabelle auf nächste Seite geschoben |
 
 ## Font-Handling
